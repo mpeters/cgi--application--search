@@ -1,0 +1,35 @@
+---
+name: CGI-Application-Search
+version: 1.05
+author:
+  - 'Michael Peters <mpeters@plusthree.com>'
+abstract: Base class for CGI::App Swish-e site engines
+license: perl
+resources:
+  license: http://dev.perl.org/licenses/
+requires:
+  CGI::Application: 3.2
+  CGI::Application::Plugin::AnyTemplate: 0
+  Data::Page: 1
+  File::Spec: 0
+  File::Spec::Functions: 0
+  HTML::FillInForm: 1.04
+  HTML::HiLiter: 0.12
+  Number::Format: 0
+  POSIX: 0
+  SWISH::API: 0.04
+  Text::Context: 3.5
+  Time::HiRes: 0
+  Time::Piece: 0
+  perl: 5.6.1
+build_requires:
+  Test::Class: 0
+  Test::LongString: 0
+provides:
+  CGI::Application::Search:
+    file: lib/CGI/Application/Search.pm
+    version: 1.05
+generated_by: Module::Build version 0.2808
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  version: 1.2
