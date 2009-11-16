@@ -1,0 +1,15 @@
+*~
+*.bak
+*.swo
+*.swp
+Build
+Smolder-*
+TODO
+_build
+blib
+data
+logs/*
+notes
+smolder.conf
+z-backup
+META.yml
