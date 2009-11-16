@@ -5,7 +5,9 @@ Module::Build->new(
     license => 'perl',
     requires => {
         'perl'                                    => '5.6.1',
-        'CGI::Application'                        => 3.2,
+        'CGI::Application'                        => 4.31,
+        'Encode'                                  => 0,
+        'Unicode::Normalize'                      => 0,
         'CGI::Application::Plugin::AnyTemplate'   => 0,
         'SWISH::API'                              => 0.04, # in swish-e 2.4.5
         'HTML::HiLiter'                           => 0.12,
