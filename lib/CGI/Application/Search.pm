@@ -13,7 +13,8 @@ use Time::Piece;
 use POSIX qw(ceil);
 use Text::Context;
 use Unicode::Normalize;
-use Encode qw(decode_utf8);
+use Encode qw(decode_utf8 encode_utf8);
+use File::Slurp qw(read_file);
 
 our $VERSION = '1.05';
 our (
@@ -24,7 +25,7 @@ our (
 $SUGGEST_CACHE_TIME = 0;
 
 # some thing that will never appear in any doc that let's us return everything
-our $PHRASE_THAT_WILL_NOT_APPEAR = 'asdfqweasdfasdflqkqoiqnwlekjiquwoienlkqw';
+our $BLANK_SEARCH = 'not asdfqweasdfasdflqkqoiqnwlekjiquwoienlkqw';
 
 # load SWISH::API and complain if not available.  This is done here
 # and not in Makefile.PL because SWISH::API is not on CPAN.  It's part
@@ -204,7 +205,7 @@ This is where the meat of the searching is performed. We create a
 L<SWISH::API> object on the B<SWISHE_INDEX> and create the query for the
 search based on the value of the I<keywords> parameter in CGI and any
 other B<EXTRA_PARAMETERS>. The search is executed and if B<HIGHLIGHT>
-is true we will use L<HTML::HiLiter> to highlight it and then format
+is true we will use L<Search::Tools::HiLiter> to highlight it and then format
 the results, only showing B<PER_PAGE> number of elements A paging list
 is also shown for navigating through the results. Then we will return
 to the B<show_search()> method for displaying everything.
@@ -316,20 +317,36 @@ sub highlight_remote_page {
 
 sub _hilight_page {
     my ($self, $page) = @_;
+    my $content;
 
-    require HTML::HiLiter;
-    my $hl = HTML::HiLiter->new(
-        HiTag   => $self->param('HIGHLIGHT_TAG'),
-        HiClass => $self->param('HIGHLIGHT_CLASS'),
-        Colors  => $self->param('HIGHLIGHT_COLORS'),
-        Print   => 0,
-        Parser  => 0,
-    );
+    # Search::Tools::HiLiter doesn't like blank searches so handle those on our own
+    if( -e $page ) {
+        $content = decode_utf8(read_file($page));
+    } else {
+        require HTTP::Request;
+        require LWP::UserAgent;
+        my $ua  = LWP::UserAgent->new();
+        my $request  = HTTP::Request->new( GET => $page);
+        my $response = $ua->request($request);
+        if ( $response->is_error ) {
+            warn "Error: Couldn't get '$page': response code " . $response->code . "\n";
+            return;
+        }
 
-    $hl->Queries($q->param('keywords'));
-    $hl->Inline();
+        $content = $response->content;
+    }
 
-    return $hl->Run($page);
+    my $search_query = $self->query->param('keywords');
+    if( $search_query && $search_query ne $BLANK_SEARCH ) {
+        require Search::Tools::HiLiter;
+        $content = Search::Tools::HiLiter->new(
+            tag          => $self->param('HIGHLIGHT_TAG'),
+            class        => $self->param('HIGHLIGHT_CLASS'),
+            colors       => $self->param('HIGHLIGHT_COLORS'),
+            query        => $search_query,
+        )->hilite($content);
+    }
+    return $content;
 }
 
 =head2 highlight_local_page
@@ -424,7 +441,7 @@ sub new {
         PER_PAGE           => 10,
         HIGHLIGHT          => 1,
         HIGHLIGHT_TAG      => q(strong),
-        HIGHLIGHT_CLASS    => '',
+        HIGHLIGHT_CLASS    => 'hilite',
         HIGHLIGHT_COLORS   => [],
         DESCRIPTION_LENGTH => 250,
         TEMPLATE_TYPE      => 'HTMLTemplate',
@@ -533,7 +550,7 @@ sub generate_search_query {
         }
     }
 
-    return $search || "not $PHRASE_THAT_WILL_NOT_APPEAR";
+    return $search || $BLANK_SEARCH;
 }
 
 =head2 suggested_words($word)
@@ -877,18 +894,15 @@ sub _process_results {
             }
 
             # if we want to highlight the description
-            if ($self->param('HIGHLIGHT')) {
-                require HTML::HiLiter;
-                my $hi_liter = HTML::HiLiter->new(
-                    HiTag   => $self->param('HIGHLIGHT_TAG'),
-                    HiClass => $self->param('HIGHLIGHT_CLASS'),
-                    Colors  => $self->param('HIGHLIGHT_COLORS'),
-                    SWISH   => $swish,
-                    Parser  => 0,
+            if ($self->param('HIGHLIGHT') && $search_query && $search_query ne $BLANK_SEARCH) {
+                require Search::Tools::HiLiter;
+                my $hl = Search::Tools::HiLiter->new(
+                    tag          => $self->param('HIGHLIGHT_TAG'),
+                    class        => $self->param('HIGHLIGHT_CLASS'),
+                    colors       => $self->param('HIGHLIGHT_COLORS'),
+                    query        => $search_query,
                 );
-                $hi_liter->Queries($search_query);
-                $hi_liter->Inline();
-                $description = $hi_liter->plaintext($description);
+                $description = $hl->plain($description);
             }
 
             # now make sure it's the appropriate length
