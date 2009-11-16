@@ -5,12 +5,12 @@ Module::Build->new(
     license => 'perl',
     requires => {
         'perl'                                    => '5.6.1',
-        'CGI::Application'                        => 4.31,
+        'CGI::Application'                        => 4.0,
         'Encode'                                  => 0,
         'Unicode::Normalize'                      => 0,
         'CGI::Application::Plugin::AnyTemplate'   => 0,
         'SWISH::API'                              => 0.04, # in swish-e 2.4.5
-        'HTML::HiLiter'                           => 0.12,
+        'Search::Tools::HiLiter'                  => 0.12,
         'Data::Page'                              => 1.0,
         'File::Spec::Functions'                   => 0,
         'Number::Format'                          => 0,
@@ -20,6 +20,9 @@ Module::Build->new(
         'POSIX'                                   => 0,
         'Text::Context'                           => 3.5,
         'File::Spec'                              => 0,
+        'Capture::Tiny'                           => 0.06,
+        'Cwd'                                     => 0,
+        'File::Slurp'                             => 9999.13,
     },
     build_requires  => {
         'Test::LongString'                        => 0,
