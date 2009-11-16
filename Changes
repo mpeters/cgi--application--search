@@ -1,5 +1,9 @@
 Revision history for Perl extension CGI::Application::Dispatch.
 
+1.10 (Nov 16, 2009)
+    - Assumes UTF-8 data by default. Can be turned off with UTF8 parameter
+    - Using Search::Tools::HiLiter instead of HTML::HiLiter
+
 1.05 (Jan 02, 2007)
     - Can now search on poperties that are false, but still there (I'm thinking of you
       zero)
