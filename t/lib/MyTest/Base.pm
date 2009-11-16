@@ -5,6 +5,8 @@ use Test::LongString;
 use CGI::Application::Search;
 use CGI;
 use File::Spec::Functions qw(catfile catdir);
+use Capture::Tiny qw(capture_merged);
+use Cwd qw(getcwd);
 
 # setup our tests
 $ENV{CGI_APP_RETURN_ONLY} = 1;
@@ -15,6 +17,23 @@ our %BASE_OPTIONS = (
 );
 # will be overridden by subclasses
 sub options { () }
+
+sub create_index :Test(startup) {
+    my $self = shift;
+    my $conf = catfile('t', 'conf', 'swish-e.conf');
+    my $cmd = 'swish-e -v 1 -c swish-e.conf -f swish-e.index';
+
+    my $cwd = getcwd();
+    chdir(catfile($cwd, 't', 'conf'));
+
+    my $return;
+    my $output = capture_merged { $return = system($cmd) };
+    chdir($cwd);
+    if($return != 0 ) {
+        diag($output);
+        $self->SKIP_ALL("Could not create swish-e index!");
+    }
+} 
 
 sub A_blank_keywords: Test(1) {
     my $self = shift;
@@ -181,8 +200,8 @@ sub D_search_with_highlighting: Test(22) {
     like_string($output, qr/>\w+ \d\d?, 200\d - \d+(K|M|G)?</i);
     contains_string($output, 'This is a Test');
     contains_string($output, 'Please Help Me');
-    contains_string($output, 'And <strong>please</strong> do not panic');
-    contains_string($output, '<strong>please</strong> help me');
+    contains_string($output, 'And <strong class="hilite">please</strong> do not panic');
+    contains_string($output, '<strong class="hilite">please</strong> help me');
     contains_string($output, 'Results: 1 to 2 of 2');
 
     # phrase 'please help'
@@ -201,7 +220,7 @@ sub D_search_with_highlighting: Test(22) {
     );
     $output = $app->run();
     contains_string($output, 'Please Help Me');
-    contains_string($output, '<strong>please help</strong> me');
+    contains_string($output, '<strong class="hilite">please help</strong> me');
     contains_string($output, 'Results: 1 to 1 of 1');
 
     # phrase 'please help' and keyword 'panic'
@@ -221,9 +240,9 @@ sub D_search_with_highlighting: Test(22) {
     $output = $app->run();
     contains_string($output, 'Please Help Me');
     contains_string($output, 'This is a Test');
-    contains_string($output, '<strong>please help</strong> me');
-    contains_string($output, 'please do not <strong>panic</strong>');
-    lacks_string($output, '<strong>or</strong>');
+    contains_string($output, '<strong class="hilite">please help</strong> me');
+    contains_string($output, 'please do not <strong class="hilite">panic</strong>');
+    lacks_string($output, '<strong class="hilite">or</strong>');
     contains_string($output, 'Results: 1 to 2 of 2');
 
     # without 'real' keywords
@@ -280,7 +299,7 @@ sub D_search_with_highlighting: Test(22) {
     );
     $output = $app->run();
     contains_string($output, 'Find the Context');
-    contains_string($output, 'I would like to find the <strong>context</strong> in this');
+    contains_string($output, 'I would like to find the <strong class="hilite">context</strong> in this');
     lacks_string($output, 'Lorem ipsum');
 }
 
@@ -558,7 +577,7 @@ sub J_highlight_local_page: Test(1) {
         },
     );
     my $output = $app->run();
-    contains_string($output, 'you <strong>please</strong> help');
+    contains_string($output, 'you <strong class="hilite">please</strong> help');
 }
 
 sub K_sort_by: Test(4) {
