@@ -16,7 +16,7 @@ use Unicode::Normalize;
 use Encode qw(decode_utf8 encode_utf8);
 use File::Slurp qw(read_file);
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 our (
     $DEBUG,                # a debug flag
     @SUGGEST_CACHE,        # cached suggestions
@@ -37,6 +37,8 @@ BEGIN {
 Unable to load SWISH::API.  This module is included in the Swish-e
 distribution, inside the perl/ directory.  Please see the
 CGI::Application::Search documentation for more details.
+
+Error returned was: $@
 
 END
 }
@@ -338,13 +340,17 @@ sub _hilight_page {
 
     my $search_query = $self->query->param('keywords');
     if( $search_query && $search_query ne $BLANK_SEARCH ) {
-        require Search::Tools::HiLiter;
-        $content = Search::Tools::HiLiter->new(
-            tag          => $self->param('HIGHLIGHT_TAG'),
-            class        => $self->param('HIGHLIGHT_CLASS'),
-            colors       => $self->param('HIGHLIGHT_COLORS'),
-            query        => $search_query,
-        )->hilite($content);
+        eval { require Search::Tools::HiLiter };
+        if ($@) {
+            warn "Could not load Search::Tools::HiLiter so no hilighting will be done: $@";
+        } else {
+            $content = Search::Tools::HiLiter->new(
+                tag    => $self->param('HIGHLIGHT_TAG'),
+                class  => $self->param('HIGHLIGHT_CLASS'),
+                colors => $self->param('HIGHLIGHT_COLORS'),
+                query  => $search_query,
+            )->hilite($content);
+        }
     }
     return $content;
 }
@@ -431,12 +437,9 @@ our defaults.
 =cut
 
 sub new {
-    my $class = shift;
-
-    my $self = $class->SUPER::new(@_);
-
+    my ($class, %args) = @_;
     # setup my defaults
-    my %defaults = (
+    $args{PARAMS} = {
         SWISHE_INDEX       => catfile('data', 'swish-e.index'),
         PER_PAGE           => 10,
         HIGHLIGHT          => 1,
@@ -447,11 +450,10 @@ sub new {
         TEMPLATE_TYPE      => 'HTMLTemplate',
         TEMPLATE_CONFIG    => undef,
         UTF8               => 1,
-    );
-    foreach my $k (keys %defaults) {
-        $self->param($k => $defaults{$k})
-          unless (defined $self->param($k));
-    }
+        $args{PARAMS} ? %{$args{PARAMS}} : (),
+    };
+
+    my $self = $class->SUPER::new(%args);
 
     # setup the template configs
     my $path = catdir((splitpath($INC{'CGI/Application/Search.pm'}))[1], 'Search', 'templates',);
@@ -895,14 +897,18 @@ sub _process_results {
 
             # if we want to highlight the description
             if ($self->param('HIGHLIGHT') && $search_query && $search_query ne $BLANK_SEARCH) {
-                require Search::Tools::HiLiter;
-                my $hl = Search::Tools::HiLiter->new(
-                    tag          => $self->param('HIGHLIGHT_TAG'),
-                    class        => $self->param('HIGHLIGHT_CLASS'),
-                    colors       => $self->param('HIGHLIGHT_COLORS'),
-                    query        => $search_query,
-                );
-                $description = $hl->plain($description);
+                eval { require Search::Tools::HiLiter };
+                if ($@) {
+                    warn "Could not load Search::Tools::HiLiter so no hilighting will be done: $@";
+                } else {
+                    my $hl = Search::Tools::HiLiter->new(
+                        tag    => $self->param('HIGHLIGHT_TAG'),
+                        class  => $self->param('HIGHLIGHT_CLASS'),
+                        colors => $self->param('HIGHLIGHT_COLORS'),
+                        query  => $search_query,
+                    );
+                    $description = $hl->plain($description);
+                }
             }
 
             # now make sure it's the appropriate length
