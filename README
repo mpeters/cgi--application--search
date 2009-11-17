@@ -4,7 +4,7 @@ NAME
 SYNOPSIS
         package My::Search;
         use base 'CGI::Application::Search';
-        
+
         sub cgiapp_init {
             my $self = shift;
             $self->param(
@@ -14,12 +14,11 @@ SYNOPSIS
         }
 
         sub cgiapp_prerun {
-            my $self = shift;
+            my $self  = shift;
             my $query = $self->query;
 
             # let the user turn context highlighting off
-            $self->param('HIGHLIGHT' => 0)
-                if($query->param('highlight_off'));
+            $self->param('HIGHLIGHT' => 0) if $query->param('highlight_off');
 
             # let the user change which property is used in the sort
             my $sort_by = $query->param('sort_by');
@@ -69,10 +68,10 @@ RUN_MODES
     SWISH::API object on the SWISHE_INDEX and create the query for the
     search based on the value of the *keywords* parameter in CGI and any
     other EXTRA_PARAMETERS. The search is executed and if HIGHLIGHT is true
-    we will use HTML::HiLiter to highlight it and then format the results,
-    only showing PER_PAGE number of elements A paging list is also shown for
-    navigating through the results. Then we will return to the show_search()
-    method for displaying everything.
+    we will use Search::Tools::HiLiter to highlight it and then format the
+    results, only showing PER_PAGE number of elements A paging list is also
+    shown for navigating through the results. Then we will return to the
+    show_search() method for displaying everything.
 
   highlight_remote_page
     This run mode will fetch a remote page (with either a relative, or
@@ -304,7 +303,7 @@ CONFIGURATION
         my $count       = 0;
 
         # while we still have more results
-        while(my $current = $results->NextResult) {
+        while (my $current = $results->NextResult) {
             my %tmp = (
                 reccount    => $current->Property('swishreccount'),
                 rank        => $current->Property('swishrank'),
@@ -317,19 +316,20 @@ CONFIGURATION
             );
 
             # now add any EXTRA_PROPERTIES that we want to show
-            if($self->param('EXTRA_PROPERTIES')) {
-                $tmp{$_} = eval { $current->Property($_) } foreach(@{$self->param('EXTRA_PROPERTIES')});
-            }
-            if($self->param('EXTRA_RANGE_PROPERTIES')) {
+            if ($self->param('EXTRA_PROPERTIES')) {
                 $tmp{$_} = eval { $current->Property($_) }
-                  foreach(@{$self->param('EXTRA_RANGE_PROPERTIES')});
+                  foreach (@{$self->param('EXTRA_PROPERTIES')});
+            }
+            if ($self->param('EXTRA_RANGE_PROPERTIES')) {
+                $tmp{$_} = eval { $current->Property($_) }
+                  foreach (@{$self->param('EXTRA_RANGE_PROPERTIES')});
             }
 
             my $description = $tmp{description};
-            if($description) {
+            if ($description) {
 
                 # if we want to zero in on the context
-                if($self->param('DESCRIPTION_CONTEXT')) {
+                if ($self->param('DESCRIPTION_CONTEXT')) {
 
                     # get the keywords from the swish search
                     my @keywords = ();
@@ -337,7 +337,7 @@ CONFIGURATION
 
                         # remove boolean operators 'and', 'or' and 'not'
                         my $lc_kw = lc($kw);
-                        if($lc_kw ne 'and' && $lc_kw ne 'or' && $lc_kw ne 'not') {
+                        if ($lc_kw ne 'and' && $lc_kw ne 'or' && $lc_kw ne 'not') {
                             push(@keywords, $kw);
                         }
                     }
@@ -348,18 +348,15 @@ CONFIGURATION
                 }
 
                 # if we want to highlight the description
-                if($self->param('HIGHLIGHT')) {
-                    require HTML::HiLiter;
-                    my $hi_liter = HTML::HiLiter->new(
-                        HiTag   => $self->param('HIGHLIGHT_TAG'),
-                        HiClass => $self->param('HIGHLIGHT_CLASS'),
-                        Colors  => $self->param('HIGHLIGHT_COLORS'),
-                        SWISH   => $swish,
-                        Parser  => 0,
+                if ($self->param('HIGHLIGHT') && $search_query && $search_query ne $BLANK_SEARCH) {
+                    require Search::Tools::HiLiter;
+                    my $hl = Search::Tools::HiLiter->new(
+                        tag          => $self->param('HIGHLIGHT_TAG'),
+                        class        => $self->param('HIGHLIGHT_CLASS'),
+                        colors       => $self->param('HIGHLIGHT_COLORS'),
+                        query        => $search_query,
                     );
-                    $hi_liter->Queries($search_query);
-                    $hi_liter->Inline();
-                    $description = $hi_liter->plaintext($description);
+                    $description = $hl->plain($description);
                 }
 
                 # now make sure it's the appropriate length
@@ -369,7 +366,7 @@ CONFIGURATION
 
             # only go as far as the number per page
             ++$count;
-            last if($count == $self->param('PER_PAGE'));
+            last if ($count == $self->param('PER_PAGE'));
         }
         return \@result_loop;
     }
@@ -377,7 +374,7 @@ CONFIGURATION
     sub _get_search_terms { my ($self, $swish, $search, $results, $keywords)
     = @_; my @phrases = (); my %terms = ();
 
-        while($keywords =~ /\G\s*"([^"]+)"/g) {
+        while ($keywords =~ /\G\s*"([^"]+)"/g) {
             push(@phrases, $1);
         }
 
@@ -394,14 +391,14 @@ CONFIGURATION
         $stop_words{$_} = 1 foreach qw(and or not);
 
         for my $word (split(/\s+/, $keywords)) {
-            if($word) {
+            if ($word) {
                 next if $stop_words{$word};
                 $terms{$word} = 1;
             }
         }
 
         # now look at the stems of these words
-        $terms{$swish->fuzzify($swish->index_names, $_)->WordList} = 1 foreach(keys %terms);
+        $terms{$swish->fuzzify($swish->index_names, $_)->WordList} = 1 foreach (keys %terms);
         return keys %terms, @phrases;
     }
 
@@ -426,17 +423,14 @@ CONFIGURATION
         $self->param('first_page'    => $pager->first_page eq $page_num);
         $self->param('last_page'     => $pager->last_page eq $page_num);
 
-        foreach(($page_num - 5) .. ($page_num + 5)) {
-
+        foreach (($page_num - 5) .. ($page_num + 5)) {
             # if we are in a real range
-            if(    ($_ > 0)
-                && ($_ <= ceil($pager->total_entries / $self->param('PER_PAGE'))))
-            {
+            if (($_ > 0) && ($_ <= ceil($pager->total_entries / $self->param('PER_PAGE')))) {
                 my %hash = (page_num => $_, current => $_ eq $page_num);
                 push(@pages, \%hash);
             }
         }
-        $self->param(pages => \@pages) if($#pages);
+        $self->param(pages => \@pages) if ($#pages);
     }
 
     1;
