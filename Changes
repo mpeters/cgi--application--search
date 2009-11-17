@@ -1,7 +1,12 @@
 Revision history for Perl extension CGI::Application::Dispatch.
 
+1.11 (Nov 17, 2009)
+    - Better diagnostics when we can't load SWISH::API to be able to track down the reasons [M. Stosberg]
+    - If we can't load Search::Tools::HiLiter then just warn and move one without highlighting
+    - UTF-8 is now the default.
+
 1.10 (Nov 16, 2009)
-    - Assumes UTF-8 data by default. Can be turned off with UTF8 parameter
+    - UTF-8 can now be turned on with UTF8 parameter
     - Using Search::Tools::HiLiter instead of HTML::HiLiter
 
 1.05 (Jan 02, 2007)
