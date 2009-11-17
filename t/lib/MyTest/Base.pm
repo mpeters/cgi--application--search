@@ -1,5 +1,7 @@
 package MyTest::Base;
 use base 'Test::Class';
+use strict;
+use warnings;
 use Test::More;
 use Test::LongString;
 use CGI::Application::Search;
@@ -35,7 +37,7 @@ sub create_index :Test(startup) {
     }
 } 
 
-sub A_blank_keywords: Test(1) {
+sub A_blank_keywords: Test(2) {
     my $self = shift;
     my $cgi = CGI->new({
         rm          => 'perform_search',
@@ -48,12 +50,12 @@ sub A_blank_keywords: Test(1) {
             $self->options(),
         },
     );
-    $output = $app->run();
+    my $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'Results: 1 to 8 of 8', 'blank shows everything');
 }
 
-
-sub B_keyword_search: Test(21) {
+sub B_keyword_search: Test(25) {
     my $self = shift;
     # simple word 'please'
     # no higlighting
@@ -69,7 +71,8 @@ sub B_keyword_search: Test(21) {
             HIGHLIGHT => 0,
         },
     );
-    $output = $app->run();
+    my $output = $app->run();
+    is_utf8($output);
     lacks_string($output, 'No results');
     like_string($output, qr/Elapsed Time: \d\.\d{1,3}s/i);
     like_string($output, qr/>\w+ \d\d?, 200\d - \d+(K|M|G)?</i);
@@ -93,6 +96,7 @@ sub B_keyword_search: Test(21) {
         },
     );
     $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'Please Help Me');
     contains_string($output, 'Would you please help me find this document');
     contains_string($output, 'Results: 1 to 1 of 1');
@@ -111,6 +115,7 @@ sub B_keyword_search: Test(21) {
         },
     );
     $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'Please Help Me');
     contains_string($output, 'This is a Test');
     contains_string($output, 'Would you please help me find this document');
@@ -129,6 +134,7 @@ sub B_keyword_search: Test(21) {
         PARAMS  => \%params,
     );
     $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'Please Help Me');
     contains_string($output, 'This is a Test');
     contains_string($output, 'Would you please help me find this document');
@@ -136,7 +142,7 @@ sub B_keyword_search: Test(21) {
     contains_string($output, 'Results: 1 to 2 of ');
 }
 
-sub C_search_with_context: Test(7) {
+sub C_search_with_context: Test(9) {
     my $self = shift;
     # simple word 'context'
     my $cgi = CGI->new({
@@ -152,7 +158,8 @@ sub C_search_with_context: Test(7) {
             DESCRIPTION_CONTEXT => 1,
         },
     );
-    $output = $app->run();
+    my $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'Find the Context');
     contains_string($output, 'I would like to find the context in this');
     lacks_string($output, 'Lorem ipsum');
@@ -173,12 +180,13 @@ sub C_search_with_context: Test(7) {
         },
     );
     $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'Find the Context');
     contains_string($output, 'I would like to find the context in this');
     lacks_string($output, 'Lorem ipsum');
 }
 
-sub D_search_with_highlighting: Test(22) {
+sub D_search_with_highlighting: Test(28) {
     my $self = shift;
     # simple word 'please'
     my $cgi = CGI->new({
@@ -194,7 +202,8 @@ sub D_search_with_highlighting: Test(22) {
             DESCRIPTION_CONTEXT => 0,
         },
     );
-    $output = $app->run();
+    my $output = $app->run();
+    is_utf8($output);
     lacks_string($output, 'No results');
     like_string($output, qr/Elapsed Time: \d\.\d{1,3}s/i);
     like_string($output, qr/>\w+ \d\d?, 200\d - \d+(K|M|G)?</i);
@@ -219,6 +228,7 @@ sub D_search_with_highlighting: Test(22) {
         },
     );
     $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'Please Help Me');
     contains_string($output, '<strong class="hilite">please help</strong> me');
     contains_string($output, 'Results: 1 to 1 of 1');
@@ -238,6 +248,7 @@ sub D_search_with_highlighting: Test(22) {
         },
     );
     $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'Please Help Me');
     contains_string($output, 'This is a Test');
     contains_string($output, '<strong class="hilite">please help</strong> me');
@@ -261,6 +272,7 @@ sub D_search_with_highlighting: Test(22) {
         },
     );
     $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'No results');
 
     # $DEBUG on
@@ -280,6 +292,7 @@ sub D_search_with_highlighting: Test(22) {
         },
     );
     eval { $output = $app->run() };
+    is_utf8($output);
     contains_string($output, 'No results');
     _restore_stderr();
 
@@ -298,12 +311,13 @@ sub D_search_with_highlighting: Test(22) {
         },
     );
     $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'Find the Context');
     contains_string($output, 'I would like to find the <strong class="hilite">context</strong> in this');
     lacks_string($output, 'Lorem ipsum');
 }
 
-sub E_with_extra_props: Test(8) {
+sub E_with_extra_props: Test(11) {
     my $self = shift;
     my $cgi = CGI->new({
         rm          => 'perform_search',
@@ -319,7 +333,8 @@ sub E_with_extra_props: Test(8) {
             EXTRA_PROPERTIES    => [qw(extra)],
         },
     );
-    $output = $app->run();
+    my $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'This is a Test');
     contains_string($output, 'Results: 1 to 1 of 1');
 
@@ -335,6 +350,7 @@ sub E_with_extra_props: Test(8) {
         },
     );
     $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'This is a Test');
     contains_string($output, 'Please Help Me');
     contains_string($output, 'Results: 1 to 2 of 2');
@@ -356,12 +372,13 @@ sub E_with_extra_props: Test(8) {
     );
     $app->delete('EXTRA_PROPERTIES');
     $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'This is a Test');
     contains_string($output, 'Please Help Me');
     contains_string($output, 'Results: 1 to 2 of 2');
 }
 
-sub E_with_extra_range_props: Test(2) {
+sub E_with_extra_range_props: Test(3) {
     my $self = shift;
     my $cgi = CGI->new({
         rm                  => 'perform_search',
@@ -378,12 +395,13 @@ sub E_with_extra_range_props: Test(2) {
             EXTRA_RANGE_PROPERTIES => [qw(extra_range)],
           },
     );
-    $output = $app->run();
+    my $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'This is a Range Test');
     contains_string($output, 'Results: 1 to 2 of 2');
 }
 
-sub F_predefined_results: Test(2) {
+sub F_predefined_results: Test(4) {
     my $self = shift;
     # without  keywords
     my $cgi = CGI->new({
@@ -398,7 +416,8 @@ sub F_predefined_results: Test(2) {
         },
     );
     $app->param(results => [] );
-    $output = $app->run();
+    my $output = $app->run();
+    is_utf8($output);
     lacks_string($output, '<h2>Search Results');
 
     # with keywords
@@ -416,10 +435,11 @@ sub F_predefined_results: Test(2) {
     );
     $app->param(results => [] );
     $output = $app->run();
+    is_utf8($output);
     lacks_string($output, '<h2>Search Results');
 }
 
-sub G_without_description: Test(4) {
+sub G_without_description: Test(6) {
     my $self = shift;
     # without highlighting
     my $cgi = CGI->new({
@@ -434,7 +454,8 @@ sub G_without_description: Test(4) {
             HIGHLIGHT => 0,
         },
     );
-    $output = $app->run();
+    my $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'This is another Test');
     contains_string($output, 'Results: 1 to 1 of 1');
 
@@ -452,11 +473,12 @@ sub G_without_description: Test(4) {
         },
     );
     $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'This is another Test');
     contains_string($output, 'Results: 1 to 1 of 1');
 }
 
-sub H_without_context: Test(4) {
+sub H_without_context: Test(6) {
     my $self = shift;
     # without highlighting
     my $cgi = CGI->new({
@@ -472,7 +494,8 @@ sub H_without_context: Test(4) {
             DESCRIPTION_CONTEXT => 1,
         },
     );
-    $output = $app->run();
+    my $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'This is yet a fourth Test');
     contains_string($output, 'Results: 1 to 1 of 1');
 
@@ -491,11 +514,12 @@ sub H_without_context: Test(4) {
         },
     );
     $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'This is yet a fourth Test');
     contains_string($output, 'Results: 1 to 1 of 1');
 }
 
-sub I_per_page: Test(15) {
+sub I_per_page: Test(18) {
     my $self = shift;
     my $cgi = CGI->new({
         rm          => 'perform_search',
@@ -511,7 +535,8 @@ sub I_per_page: Test(15) {
             PER_PAGE  => 1,
         },
     );
-    $output = $app->run();
+    my $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'This is a Test');
     lacks_string($output, 'Please Help Me');
     contains_string($output, 'This is a test. This is a only a test. And please do not panic.');
@@ -534,6 +559,7 @@ sub I_per_page: Test(15) {
         },
     );
     $output = $app->run();
+    is_utf8($output);
     lacks_string($output, 'This is a Test');
     contains_string($output, 'Please Help Me');
     lacks_string($output, 'This is a test. This is a only a test. And please do not panic.');
@@ -555,6 +581,7 @@ sub I_per_page: Test(15) {
         },
     );
     $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'This is a Test');
     contains_string($output, 'Please Help Me');
     contains_string($output, 'This is a test. This is a only a test. And please do not panic.');
@@ -562,14 +589,14 @@ sub I_per_page: Test(15) {
     contains_string($output, 'Results: 1 to 2 of 2');
 }
 
-sub J_highlight_local_page: Test(1) {
+sub J_highlight_local_page: Test(2) {
     my $self = shift;
-    $cgi = CGI->new({
+    my $cgi = CGI->new({
         rm          => 'highlight_local_page',
         keywords    => 'please',
         path        => 'helpme.html',
     });
-    $app = CGI::Application::Search->new(
+    my $app = CGI::Application::Search->new(
         QUERY   => $cgi,
         PARAMS  => {
             %BASE_OPTIONS,
@@ -577,10 +604,11 @@ sub J_highlight_local_page: Test(1) {
         },
     );
     my $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'you <strong class="hilite">please</strong> help');
 }
 
-sub K_sort_by: Test(4) {
+sub K_sort_by: Test(6) {
     my $self = shift;
     my $cgi = CGI->new({
         rm          => 'perform_search',
@@ -597,7 +625,8 @@ sub K_sort_by: Test(4) {
             SORT_BY   => 'swishtitle asc',
         },
     );
-    $output = $app->run();
+    my $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'Results: 1 to 2 of 2', 'correct num of results');
     like_string($output, qr/Please Help Me.*This is a Test/is, 'correct order');
 
@@ -613,8 +642,28 @@ sub K_sort_by: Test(4) {
     );
 
     $output = $app->run();
+    is_utf8($output);
     contains_string($output, 'Results: 1 to 2 of 2', 'correct num of results');
     like_string($output, qr/This is a Test.*Please Help Me/is, 'correct order');
+}
+
+sub show_search: Test(2) {
+    my $self = shift;
+    my $app = CGI::Application::Search->new(
+        PARAMS => {
+            %BASE_OPTIONS,
+            $self->options(),
+        },
+    );
+    my $output = $app->run();
+    is_utf8($output);
+    lacks_string($output, '<h2>Search Results');
+}
+
+sub is_utf8 {
+    my $content = shift;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    like_string($content, qr/Content-Type: text\/html; charset=UTF-8/i, 'is utf8');
 }
 
 # to capture and junk STDERR
@@ -638,18 +687,6 @@ sub K_sort_by: Test(4) {
     sub _stderr_junk {
         return $junk;
     }
-}
-
-sub show_search: Test(1) {
-    my $self = shift;
-    my $app = CGI::Application::Search->new(
-        PARAMS => {
-            %BASE_OPTIONS,
-            $self->options(),
-        },
-    );
-    my $output = $app->run();
-    lacks_string($output, '<h2>Search Results');
 }
 
 
