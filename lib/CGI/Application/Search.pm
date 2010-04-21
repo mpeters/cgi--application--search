@@ -16,7 +16,7 @@ use Unicode::Normalize;
 use Encode qw(decode_utf8 encode_utf8);
 use File::Slurp qw(read_file);
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 our (
     $DEBUG,                # a debug flag
     @SUGGEST_CACHE,        # cached suggestions
@@ -840,7 +840,12 @@ could specify a C<SORT_BY> of
 
     swishrank asc
 
-See 
+=head2 FIF_DEFAULTS
+
+A hash reference of extra parameters that are passed to L<HTML::FillInForm>
+when it does it's business with the forms. This is useful to telling
+L<HTML::FillInForm> to skip certain forms or form elements.
+
 =cut
 
 #-------------------------PRIVATE METHODS-----------------------
