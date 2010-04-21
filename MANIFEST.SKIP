@@ -1,0 +1,11 @@
+^MYMETA.yml$
+\.swp$
+\.swo$
+_build
+^Build$
+\.bak$
+\.git
+blib
+\.svn
+\.bak
+
