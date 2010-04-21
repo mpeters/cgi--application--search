@@ -196,6 +196,7 @@ sub show_search {
         $output = $filler->fill(
             scalarref => ref($output) ? $output : \$output,
             fobject => $q,
+            ($self->param('FIF_DEFAULTS') ? %{$self->param('FIF_DEFAULTS')} : ())
         );
     }
     return $output;
