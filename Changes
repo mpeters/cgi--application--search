@@ -1,5 +1,8 @@
 Revision history for Perl extension CGI::Application::Dispatch.
 
+1.13 (Apr 27, 2010)
+    - Fixed broken tests that were using a wrong date pattern [Jason Purdy]
+
 1.12 (Apr 21, 2010)
     - Added FIF_DEFAULTS parameter to control HTML::FillInForm [Brad Oaks]
 

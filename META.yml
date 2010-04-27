@@ -16,7 +16,7 @@ name: CGI-Application-Search
 provides:
   CGI::Application::Search:
     file: lib/CGI/Application/Search.pm
-    version: 1.12
+    version: 1.13
 requires:
   CGI::Application: 4
   CGI::Application::Plugin::AnyTemplate: 0
@@ -39,4 +39,4 @@ requires:
   perl: v5.6.1
 resources:
   license: http://dev.perl.org/licenses/
-version: 1.12
+version: 1.13
