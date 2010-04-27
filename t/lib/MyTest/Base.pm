@@ -75,7 +75,7 @@ sub B_keyword_search: Test(25) {
     is_utf8($output);
     lacks_string($output, 'No results');
     like_string($output, qr/Elapsed Time: \d\.\d{1,3}s/i);
-    like_string($output, qr/>\w+ \d\d?, 200\d - \d+(K|M|G)?</i);
+    like_string($output, qr/>\w+ \d\d?, 20\d\d - \d+(K|M|G)?</i);
     contains_string($output, 'This is a Test');
     contains_string($output, 'Please Help Me');
     contains_string($output, 'This is a test. This is a only a test. And please do not panic.');
@@ -206,7 +206,7 @@ sub D_search_with_highlighting: Test(28) {
     is_utf8($output);
     lacks_string($output, 'No results');
     like_string($output, qr/Elapsed Time: \d\.\d{1,3}s/i);
-    like_string($output, qr/>\w+ \d\d?, 200\d - \d+(K|M|G)?</i);
+    like_string($output, qr/>\w+ \d\d?, 20\d\d - \d+(K|M|G)?</i);
     contains_string($output, 'This is a Test');
     contains_string($output, 'Please Help Me');
     contains_string($output, 'And <strong class="hilite">please</strong> do not panic');

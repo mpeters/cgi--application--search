@@ -28,7 +28,7 @@ sub B_ajax_search: Test(9) {
     lacks_string($output, '<h2>Search Results</h2>');
     lacks_string($output, 'No results');
     like($output, qr/Elapsed Time: \d\.\d{1,3}s/i);
-    like($output, qr/>\w+ \d\d?, 200\d - \d+(K|M|G)?</i);
+    like($output, qr/>\w+ \d\d?, 20\d\d - \d+(K|M|G)?</i);
     contains_string($output, 'This is a Test');
     contains_string($output, 'Please Help Me');
     contains_string($output, 'This is a test. This is a only a test. And please do not panic.');
