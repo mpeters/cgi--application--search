@@ -67,7 +67,7 @@ RUN_MODES
     This is where the meat of the searching is performed. We create a
     SWISH::API object on the SWISHE_INDEX and create the query for the
     search based on the value of the *keywords* parameter in CGI and any
-    other EXTRA_PARAMETERS. The search is executed and if HIGHLIGHT is true
+    other EXTRA_PROPERTIES. The search is executed and if HIGHLIGHT is true
     we will use Search::Tools::HiLiter to highlight it and then format the
     results, only showing PER_PAGE number of elements A paging list is also
     shown for navigating through the results. Then we will return to the

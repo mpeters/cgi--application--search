@@ -39,3 +39,4 @@ templates/prototype_javascript.tmpl
 templates/search_results.tmpl
 templates/search_results.tt
 TODO
+META.json

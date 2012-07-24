@@ -3,11 +3,14 @@ abstract: 'Base class for CGI::App Swish-e site engines'
 author:
   - 'Michael Peters <mpeters@plusthree.com>'
 build_requires:
+  CGI::Application::Plugin::AnyTemplate::Driver::TemplateToolkit: 0
+  Template: 0
   Test::Class: 0
   Test::LongString: 0
 configure_requires:
-  Module::Build: 0.36
-generated_by: 'Module::Build version 0.3603'
+  Module::Build: 0.4
+dynamic_config: 1
+generated_by: 'Module::Build version 0.4, CPAN::Meta::Converter version 2.112621'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -16,7 +19,7 @@ name: CGI-Application-Search
 provides:
   CGI::Application::Search:
     file: lib/CGI/Application/Search.pm
-    version: 1.13
+    version: 1.14
 requires:
   CGI::Application: 4
   CGI::Application::Plugin::AnyTemplate: 0
@@ -39,4 +42,4 @@ requires:
   perl: v5.6.1
 resources:
   license: http://dev.perl.org/licenses/
-version: 1.13
+version: 1.14
