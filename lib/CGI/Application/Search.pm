@@ -524,7 +524,7 @@ sub setup {
 =head2 generate_search_query($keywords)
 
 This method is used to generate the query for swish-e from the
-$keywords (by default the 'keywords' CGI parameter), as well as any
+C<$keywords> (by default the 'keywords' CGI parameter), as well as any
 B<EXTRA_PROPERTIES> that are present.
 
 If you wish to generate your own search query then you should override
@@ -549,7 +549,8 @@ sub generate_search_query {
     if ($self->param('EXTRA_PROPERTIES')) {
         foreach my $prop (@{$self->param('EXTRA_PROPERTIES')}) {
             my $value = $q->param($prop);
-            $search .= " and $prop=($value)" if defined $value && length $value;
+            $search .= ' and ' if $search;
+            $search .= "$prop=($value)" if defined $value && length $value;
         }
     }
 
