@@ -207,7 +207,7 @@ sub show_search {
 This is where the meat of the searching is performed. We create a
 L<SWISH::API> object on the B<SWISHE_INDEX> and create the query for the
 search based on the value of the I<keywords> parameter in CGI and any
-other B<EXTRA_PARAMETERS>. The search is executed and if B<HIGHLIGHT>
+other B<EXTRA_PROPERTIES>. The search is executed and if B<HIGHLIGHT>
 is true we will use L<Search::Tools::HiLiter> to highlight it and then format
 the results, only showing B<PER_PAGE> number of elements A paging list
 is also shown for navigating through the results. Then we will return
