@@ -16,7 +16,7 @@ use Unicode::Normalize;
 use Encode qw(decode_utf8 encode_utf8);
 use File::Slurp qw(read_file);
 
-our $VERSION = '1.13';
+our $VERSION = '1.14';
 our (
     $DEBUG,                # a debug flag
     @SUGGEST_CACHE,        # cached suggestions
