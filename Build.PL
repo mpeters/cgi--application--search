@@ -25,8 +25,10 @@ Module::Build->new(
         'File::Slurp'                             => 9999.13,
     },
     build_requires  => {
-        'Test::LongString'                        => 0,
-        'Test::Class'                             => 0,
+        'Test::LongString'                                               => 0,
+        'Test::Class'                                                    => 0,
+        'CGI::Application::Plugin::AnyTemplate::Driver::TemplateToolkit' => 0,
+        'Template'                                                       => 0,
     },
     create_readme      => 1,
     pm_files => {
